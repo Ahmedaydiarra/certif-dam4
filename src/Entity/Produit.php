@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ProduitRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -56,6 +58,40 @@ class Produit
      * @ORM\Column(type="integer")
      */
     private $disponibilite;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=categorie::class, inversedBy="produits")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $categorie;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=magasin::class, inversedBy="produits")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $magasin;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Imageproduit::class, mappedBy="produit", orphanRemoval=true)
+     */
+    private $imageproduits;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Enreduction::class, mappedBy="produit", orphanRemoval=true)
+     */
+    private $enreductions;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Commande::class, mappedBy="produit")
+     */
+    private $commandes;
+
+    public function __construct()
+    {
+        $this->imageproduits = new ArrayCollection();
+        $this->enreductions = new ArrayCollection();
+        $this->commandes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -154,6 +190,117 @@ class Produit
     public function setDisponibilite(int $disponibilite): self
     {
         $this->disponibilite = $disponibilite;
+
+        return $this;
+    }
+
+    public function getCategorie(): ?categorie
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?categorie $categorie): self
+    {
+        $this->categorie = $categorie;
+
+        return $this;
+    }
+
+    public function getMagasin(): ?magasin
+    {
+        return $this->magasin;
+    }
+
+    public function setMagasin(?magasin $magasin): self
+    {
+        $this->magasin = $magasin;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Imageproduit>
+     */
+    public function getImageproduits(): Collection
+    {
+        return $this->imageproduits;
+    }
+
+    public function addImageproduit(Imageproduit $imageproduit): self
+    {
+        if (!$this->imageproduits->contains($imageproduit)) {
+            $this->imageproduits[] = $imageproduit;
+            $imageproduit->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImageproduit(Imageproduit $imageproduit): self
+    {
+        if ($this->imageproduits->removeElement($imageproduit)) {
+            // set the owning side to null (unless already changed)
+            if ($imageproduit->getProduit() === $this) {
+                $imageproduit->setProduit(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Enreduction>
+     */
+    public function getEnreductions(): Collection
+    {
+        return $this->enreductions;
+    }
+
+    public function addEnreduction(Enreduction $enreduction): self
+    {
+        if (!$this->enreductions->contains($enreduction)) {
+            $this->enreductions[] = $enreduction;
+            $enreduction->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnreduction(Enreduction $enreduction): self
+    {
+        if ($this->enreductions->removeElement($enreduction)) {
+            // set the owning side to null (unless already changed)
+            if ($enreduction->getProduit() === $this) {
+                $enreduction->setProduit(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commande>
+     */
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
+
+    public function addCommande(Commande $commande): self
+    {
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes[] = $commande;
+            $commande->addProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommande(Commande $commande): self
+    {
+        if ($this->commandes->removeElement($commande)) {
+            $commande->removeProduit($this);
+        }
 
         return $this;
     }

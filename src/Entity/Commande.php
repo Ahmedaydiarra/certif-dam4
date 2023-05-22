@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CommandeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -36,6 +38,16 @@ class Commande
      * @ORM\Column(type="datetime")
      */
     private $date_commande;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=produit::class, inversedBy="commandes")
+     */
+    private $produit;
+
+    public function __construct()
+    {
+        $this->produit = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -86,6 +98,30 @@ class Commande
     public function setDateCommande(\DateTimeInterface $date_commande): self
     {
         $this->date_commande = $date_commande;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, produit>
+     */
+    public function getProduit(): Collection
+    {
+        return $this->produit;
+    }
+
+    public function addProduit(produit $produit): self
+    {
+        if (!$this->produit->contains($produit)) {
+            $this->produit[] = $produit;
+        }
+
+        return $this;
+    }
+
+    public function removeProduit(produit $produit): self
+    {
+        $this->produit->removeElement($produit);
 
         return $this;
     }

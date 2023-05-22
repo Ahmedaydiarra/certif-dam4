@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ReductionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -51,6 +53,16 @@ class Reduction
      * @ORM\Column(type="datetime")
      */
     private $date_suppression;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Enreduction::class, mappedBy="reduction", orphanRemoval=true)
+     */
+    private $enreductions;
+
+    public function __construct()
+    {
+        $this->enreductions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -137,6 +149,36 @@ class Reduction
     public function setDateSuppression(\DateTimeInterface $date_suppression): self
     {
         $this->date_suppression = $date_suppression;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Enreduction>
+     */
+    public function getEnreductions(): Collection
+    {
+        return $this->enreductions;
+    }
+
+    public function addEnreduction(Enreduction $enreduction): self
+    {
+        if (!$this->enreductions->contains($enreduction)) {
+            $this->enreductions[] = $enreduction;
+            $enreduction->setReduction($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnreduction(Enreduction $enreduction): self
+    {
+        if ($this->enreductions->removeElement($enreduction)) {
+            // set the owning side to null (unless already changed)
+            if ($enreduction->getReduction() === $this) {
+                $enreduction->setReduction(null);
+            }
+        }
 
         return $this;
     }
